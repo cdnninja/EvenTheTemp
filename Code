@@ -1,0 +1,52 @@
+/**
+ *  Even the temperature
+ *
+ *  Author: jaydenaphillips@gmail.com
+ *  Date: 2014-01-11
+ */
+preferences {
+	section("When the temperature difference is too high") {
+    input "temperatureSensors", "capability.temperatureMeasurement ", title: "Where?", multiple: true, required: true
+	}
+    section("By a difference of") {
+    input "difference", "decimal", title: "Degrees", required: true
+    }
+    section("Turn the fan on") {
+    input "thermostat", "capability.thermostat", title: "Where?", multiple: false, required: true
+	}
+    
+    
+}
+
+def installed() {
+	log.debug "Installed with settings: ${settings}"
+	initialize()
+}
+
+def updated() {
+	log.debug "Updated with settings: ${settings}"
+	unsubscribe()
+	initialize()
+    
+}
+
+def initialize() {
+
+  subscribe(temperatureSensors, "temperature", temperatureCheck)
+  subscribe(thermostat, "temperature", temperatureCheck)
+
+}
+
+def temperatureCheck(evt) {  
+	define turnOffFan = "True"
+	for (sensor in temperatureSensors) {
+    	if (double.abs(sensor.tempeature - thermostat.temperature) >= difference) {
+        	thermostat.fanOn()
+            turnOffFan = "False"
+        }
+    }
+    if (turnOffFan == "True") {
+    	thermostat.fanAuto()
+    }
+	
+}
