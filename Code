@@ -32,21 +32,35 @@ def updated() {
 
 def initialize() {
 
-  subscribe(temperatureSensors, "temperature", temperatureCheck)
-  subscribe(thermostat, "temperature", temperatureCheck)
+  subscribe(temperatureSensors, "temperature", executeCheck)
+  subscribe(thermostat, "temperature", executeCheck)
+  temperatureCheck()
 
 }
 
-def temperatureCheck(evt) {  
-	def turnOffFan = True
+def executeCheck(evt) {
+	temperatureCheck()
+	
+}
+
+def temperatureCheck() {  
+	def turnOffFan = "True"  
+    def actualDifference
 	for (sensor in temperatureSensors) {
-    	if (double.abs(sensor.temperature - thermostat.temperature) >= difference) {
-        	thermostat.fanOn()
-            turnOffFan = False
+    	if ((sensor.currentTemperature - thermostat.currentTemperature) >= difference) {
+        	log.debug "Turning on fan"
+        	thermostat.setThermostatFanMode("on")
+            turnOffFan = "False"
+        } else if ((thermostat.currentTemperature - sensor.currentTemperature) >= difference) {
+            log.debug "Turning on fan"
+        	thermostat.setThermostatFanMode("on")
+            turnOffFan = "False"
+        	
         }
     }
-    if (turnOffFan) {
-    	thermostat.fanAuto()
+    if (turnOffFan == "True") {
+    	thermostat.setThermostatFanMode("auto")
+        log.debug "Turning off fan"
     }
 	
 }
