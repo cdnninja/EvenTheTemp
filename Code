@@ -38,14 +38,14 @@ def initialize() {
 }
 
 def temperatureCheck(evt) {  
-	define turnOffFan = "True"
+	def turnOffFan = True
 	for (sensor in temperatureSensors) {
-    	if (double.abs(sensor.tempeature - thermostat.temperature) >= difference) {
+    	if (double.abs(sensor.temperature - thermostat.temperature) >= difference) {
         	thermostat.fanOn()
-            turnOffFan = "False"
+            turnOffFan = False
         }
     }
-    if (turnOffFan == "True") {
+    if (turnOffFan) {
     	thermostat.fanAuto()
     }
 	
